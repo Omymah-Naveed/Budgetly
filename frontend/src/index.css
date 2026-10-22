@@ -1,0 +1,478 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif;
+
+  --color-ink-50: #f8fafc;
+  --color-ink-100: #f1f5f9;
+  --color-ink-200: #e2e8f0;
+  --color-ink-300: #cbd5e1;
+  --color-ink-400: #94a3b8;
+  --color-ink-500: #64748b;
+  --color-ink-600: #475569;
+  --color-ink-700: #334155;
+  --color-ink-800: #1e293b;
+  --color-ink-900: #0f172a;
+  --color-ink-950: #020617;
+}
+
+:root {
+  --app-bg: #f8fafc;
+  --app-text: #0f172a;
+  --surface: #ffffff;
+  --surface-muted: #f8fafc;
+  --surface-strong: #f1f5f9;
+  --border-subtle: #e2e8f0;
+  --chart-grid: #e2e8f0;
+  --chart-axis: #94a3b8;
+  --chart-cursor: #cbd5e1;
+  --chart-hover: #f8fafc;
+  --chart-active-dot: #ffffff;
+  color-scheme: light;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.dark {
+  --app-bg: #020617;
+  --app-text: #e2e8f0;
+  --surface: #0f172a;
+  --surface-muted: #0b1220;
+  --surface-strong: #1e293b;
+  --border-subtle: #1e293b;
+  --chart-grid: #1e293b;
+  --chart-axis: #64748b;
+  --chart-cursor: #334155;
+  --chart-hover: #111c2e;
+  --chart-active-dot: #0f172a;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  font-family: var(--font-sans);
+  background-color: var(--app-bg);
+  color: var(--app-text);
+  transition:
+    background-color 180ms ease,
+    color 180ms ease;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+input[type='number'] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
+}
+
+button {
+  cursor: pointer;
+}
+
+::selection {
+  background-color: #a7f3d0;
+  color: #064e3b;
+}
+
+*:focus-visible {
+  outline: 2px solid #10b981;
+  outline-offset: 2px;
+}
+
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: #cbd5e1;
+  border-radius: 9999px;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateX(24px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 220ms ease-out both;
+}
+
+.animate-slide-up {
+  animation: slide-up 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-scale-in {
+  animation: scale-in 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-slide-in-left {
+  animation: slide-in-left 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-toast-in {
+  animation: toast-in 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.card-surface {
+  background-color: var(--surface);
+  border: 1px solid var(--border-subtle);
+  box-shadow:
+    0 1px 2px rgb(15 23 42 / 0.04),
+    0 10px 30px -20px rgb(15 23 42 / 0.15);
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* --------------------------------------------------------------------------
+   Dark theme
+   The app was originally styled with light-only utility classes. These
+   overrides map the common surface, text, border and ring tokens so every
+   existing view follows the theme without duplicating classes in each file.
+-------------------------------------------------------------------------- */
+
+.dark .card-surface {
+  background-color: var(--surface);
+  border-color: var(--border-subtle);
+  box-shadow:
+    0 1px 2px rgb(0 0 0 / 0.35),
+    0 18px 40px -24px rgb(0 0 0 / 0.8);
+}
+
+.dark .bg-white {
+  background-color: var(--surface);
+}
+
+.dark .bg-slate-50 {
+  background-color: var(--surface-muted);
+}
+
+.dark .bg-slate-100 {
+  background-color: var(--surface-strong);
+}
+
+.dark .bg-slate-200 {
+  background-color: #334155;
+}
+
+.dark .bg-slate-50\/85 {
+  background-color: rgb(2 6 23 / 0.85);
+}
+
+.dark .bg-slate-50\/70 {
+  background-color: rgb(11 18 32 / 0.7);
+}
+
+.dark .bg-slate-50\/60 {
+  background-color: rgb(11 18 32 / 0.6);
+}
+
+.dark .bg-slate-200\/70 {
+  background-color: rgb(51 65 85 / 0.7);
+}
+
+.dark .hover\:bg-slate-50:hover,
+.dark .hover\:bg-slate-50\/70:hover {
+  background-color: rgb(17 28 46 / 0.85);
+}
+
+.dark .hover\:bg-slate-100:hover {
+  background-color: #1e293b;
+}
+
+.dark .hover\:bg-rose-50:hover {
+  background-color: rgb(244 63 94 / 0.12);
+}
+
+.dark .text-slate-950,
+.dark .text-slate-900 {
+  color: #f8fafc;
+}
+
+.dark .text-slate-800 {
+  color: #e2e8f0;
+}
+
+.dark .text-slate-700,
+.dark .text-slate-600 {
+  color: #cbd5e1;
+}
+
+.dark .text-slate-500,
+.dark .text-slate-400 {
+  color: #94a3b8;
+}
+
+.dark .text-slate-300 {
+  color: #cbd5e1;
+}
+
+.dark .text-slate-200 {
+  color: #e2e8f0;
+}
+
+.dark .text-slate-100 {
+  color: #f1f5f9;
+}
+
+.dark .hover\:text-slate-900:hover,
+.dark .hover\:text-slate-800:hover {
+  color: #f8fafc;
+}
+
+.dark .hover\:text-slate-700:hover,
+.dark .hover\:text-slate-600:hover {
+  color: #e2e8f0;
+}
+
+.dark .border-slate-100 {
+  border-color: #1e293b;
+}
+
+.dark .border-slate-200,
+.dark .border-slate-300 {
+  border-color: #334155;
+}
+
+.dark .border-slate-200\/70 {
+  border-color: rgb(51 65 85 / 0.7);
+}
+
+.dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]) {
+  border-color: #1e293b;
+}
+
+.dark .ring-slate-100 {
+  --tw-ring-color: rgb(148 163 184 / 0.14);
+}
+
+.dark .ring-slate-200 {
+  --tw-ring-color: rgb(148 163 184 / 0.22);
+}
+
+.dark .ring-slate-300 {
+  --tw-ring-color: rgb(148 163 184 / 0.32);
+}
+
+.dark .bg-emerald-50 {
+  background-color: rgb(16 185 129 / 0.12);
+}
+
+.dark .bg-rose-50,
+.dark .bg-rose-50\/70 {
+  background-color: rgb(244 63 94 / 0.12);
+}
+
+.dark .bg-amber-50 {
+  background-color: rgb(245 158 11 / 0.12);
+}
+
+.dark .bg-sky-50 {
+  background-color: rgb(14 165 233 / 0.12);
+}
+
+.dark .bg-violet-50 {
+  background-color: rgb(139 92 246 / 0.12);
+}
+
+.dark .bg-indigo-50 {
+  background-color: rgb(99 102 241 / 0.12);
+}
+
+.dark .text-emerald-800,
+.dark .text-emerald-700,
+.dark .text-emerald-600 {
+  color: #6ee7b7;
+}
+
+.dark .text-rose-700,
+.dark .text-rose-600 {
+  color: #fda4af;
+}
+
+.dark .text-amber-800,
+.dark .text-amber-700,
+.dark .text-amber-600 {
+  color: #fcd34d;
+}
+
+.dark .text-sky-700,
+.dark .text-sky-600 {
+  color: #7dd3fc;
+}
+
+.dark .text-violet-700,
+.dark .text-violet-600 {
+  color: #c4b5fd;
+}
+
+.dark .text-indigo-700,
+.dark .text-indigo-600 {
+  color: #a5b4fc;
+}
+
+.dark .ring-emerald-100,
+.dark .ring-emerald-200 {
+  --tw-ring-color: rgb(16 185 129 / 0.28);
+}
+
+.dark .ring-rose-100,
+.dark .ring-rose-200,
+.dark .ring-rose-300 {
+  --tw-ring-color: rgb(244 63 94 / 0.28);
+}
+
+.dark .ring-amber-100,
+.dark .ring-amber-200 {
+  --tw-ring-color: rgb(245 158 11 / 0.28);
+}
+
+.dark .ring-sky-100,
+.dark .ring-sky-200 {
+  --tw-ring-color: rgb(14 165 233 / 0.28);
+}
+
+.dark .ring-violet-100,
+.dark .ring-violet-200 {
+  --tw-ring-color: rgb(139 92 246 / 0.28);
+}
+
+.dark .ring-indigo-100,
+.dark .ring-indigo-200 {
+  --tw-ring-color: rgb(99 102 241 / 0.28);
+}
+
+.dark .border-rose-100 {
+  border-color: rgb(244 63 94 / 0.25);
+}
+
+.dark .border-emerald-100 {
+  border-color: rgb(16 185 129 / 0.25);
+}
+
+.dark .border-amber-100 {
+  border-color: rgb(245 158 11 / 0.25);
+}
+
+.dark .border-sky-100 {
+  border-color: rgb(14 165 233 / 0.25);
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: #64748b;
+}
+
+.dark select option {
+  background-color: #0f172a;
+  color: #e2e8f0;
+}
+
+.dark input[type='date']::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  opacity: 0.65;
+}
+
+.dark .scrollbar-thin {
+  scrollbar-color: #334155 transparent;
+}
+
+.dark .scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: #334155;
+}
+
+.dark ::selection {
+  background-color: rgb(16 185 129 / 0.35);
+  color: #ecfdf5;
+}
