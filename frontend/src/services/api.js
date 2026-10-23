@@ -32,7 +32,7 @@ export const removeStoredItem = (key) => {
 }
 
 const api = axios.create({
-  baseURL: 'https://budgetlybackend.vercel.app/api',
+  baseURL: import.meta.env.VITE_API_URL || 'https://budgetlybackend.vercel.app/api',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -76,7 +76,7 @@ export const getApiErrorMessage = (error) => {
   }
 
   if (error?.code === 'ERR_NETWORK') {
-    return 'Cannot reach the API. Make sure the backend is running on https://budgetlybackend.vercel.app'
+    return 'Cannot reach the API. Make sure the backend is running on http://localhost:5000.'
   }
 
   if (error?.code === 'ECONNABORTED') {

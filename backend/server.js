@@ -11,8 +11,10 @@ const { migrateBudgets } = require('./services/budgetService');
 dotenv.config();
 
 const app = express();
+
+// Live frontend URL aur localhost dono ko allowed origins mein shamil kar diya hai
 const allowedOrigins = (
-  process.env.CLIENT_URL || 'http://localhost:5173'
+  process.env.CLIENT_URL || 'http://localhost:5173,https://budgetly-expense-tracker-app.vercel.app'
 )
   .split(',')
   .map((origin) => origin.trim())
