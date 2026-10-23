@@ -12,48 +12,101 @@ dotenv.config();
 
 const app = express();
 
-// Live frontend URL aur localhost dono ko allowed origins mein shamil kar diya hai
-const allowedOrigins = (
-  process.env.CLIENT_URL || 'http://localhost:5173,https://budgetly-expense-tracker-app.vercel.app'
-)
+const PRODUCTION_CLIENT_URL =
+  'https://budgetly-expense-tracker-app.vercel.app';
+
+const configuredOrigins = (process.env.CLIENT_URL || '')
   .split(',')
   .map((origin) => origin.trim())
   .filter(Boolean);
 
-// Security headers. The API does not serve HTML, so Helmet's defaults are safe.
+const allowedOrigins = new Set([
+  PRODUCTION_CLIENT_URL,
+  ...configuredOrigins,
+  ...(process.env.NODE_ENV === 'production' ? [] : ['http://localhost:5173']),
+]);
+
+const corsOptions = {
+  origin(origin, callback) {
+    if (!origin || allowedOrigins.has(origin)) {
+      return callback(null, true);
+    }
+
+    const error = new Error('Origin is not allowed by CORS.');
+    error.status = 403;
+    return callback(error);
+  },
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: [
+    'Accept',
+    'Authorization',
+    'Content-Type',
+    'Origin',
+    'X-Requested-With',
+  ],
+  credentials: false,
+  maxAge: 86400,
+  optionsSuccessStatus: 204,
+};
+
+app.disable('x-powered-by');
+app.set('trust proxy', 1);
 app.use(helmet());
 
-app.use(
-  cors({
-    origin(origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
-        return callback(null, true);
-      }
-
-      const error = new Error('Origin is not allowed by CORS.');
-      error.status = 403;
-      return callback(error);
-    },
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-    credentials: false,
-    maxAge: 86400,
-  }),
-);
-
-// Keep request bodies small and predictable.
+// Answer browser preflight requests before they reach authentication or the
+// database. This prevents OPTIONS requests from turning into 500 errors.
+app.options(/.*/, cors(corsOptions));
+app.use(cors(corsOptions));
 app.use(express.json({ limit: '100kb' }));
 
 app.get('/api/health', (req, res) =>
   res.status(200).json({ success: true, service: 'budgetly-api' }),
 );
 
-// API routes
+let databaseConnection = null;
+
+const connectDatabase = () => {
+  if (mongoose.connection.readyState === 1) {
+    return Promise.resolve(mongoose.connection);
+  }
+
+  if (databaseConnection) return databaseConnection;
+
+  if (!process.env.MONGO_URI) {
+    const error = new Error('MONGO_URI is not configured.');
+    error.status = 503;
+    return Promise.reject(error);
+  }
+
+  databaseConnection = mongoose
+    .connect(process.env.MONGO_URI, {
+      maxPoolSize: 5,
+      serverSelectionTimeoutMS: 10000,
+      bufferCommands: false,
+    })
+    .catch((error) => {
+      databaseConnection = null;
+      throw error;
+    });
+
+  return databaseConnection;
+};
+
+// Connect lazily so health checks and CORS preflights still work if MongoDB is
+// temporarily unavailable. The cached promise is reused across warm requests.
+app.use('/api', async (req, res, next) => {
+  try {
+    await connectDatabase();
+    return next();
+  } catch (error) {
+    return next(error);
+  }
+});
+
 app.use('/api/auth', authRoutes);
 app.use('/api/budgets', budgetRoutes);
 app.use('/api/transactions', transactionRoutes);
 
-// Fallback for unknown routes
 app.use((req, res) => {
   res.status(404).json({
     success: false,
@@ -61,13 +114,31 @@ app.use((req, res) => {
   });
 });
 
-// Centralized error handler (must keep all four arguments for Express)
 // eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
   if (err?.type === 'entity.too.large') {
     return res.status(413).json({
       success: false,
       message: 'Request body is too large.',
+    });
+  }
+
+  if (err?.status === 403) {
+    return res.status(403).json({
+      success: false,
+      message: 'Origin is not allowed by CORS.',
+    });
+  }
+
+  if (
+    err?.name === 'MongooseServerSelectionError' ||
+    err?.name === 'MongooseError' ||
+    err?.status === 503
+  ) {
+    console.error('Database error:', err);
+    return res.status(503).json({
+      success: false,
+      message: 'The database is temporarily unavailable. Please try again.',
     });
   }
 
@@ -79,21 +150,21 @@ app.use((err, req, res, next) => {
   });
 });
 
-const PORT = process.env.PORT || 5000;
+module.exports = app;
 
-// Connect to MongoDB first so the API never accepts requests without a database.
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(async () => {
-    console.log('MongoDB Connected Successfully!');
+if (require.main === module) {
+  const PORT = process.env.PORT || 5000;
 
-    await migrateBudgets();
+  app.listen(PORT, () => {
+    console.log(`Budgetly API is running on port ${PORT}`);
 
-    app.listen(PORT, () => {
-      console.log(`Budgetly API is running on port ${PORT}`);
-    });
-  })
-  .catch((err) => {
-    console.error('DB Connection Error: ', err);
-    process.exit(1);
+    connectDatabase()
+      .then(async () => {
+        console.log('MongoDB Connected Successfully!');
+        await migrateBudgets();
+      })
+      .catch((error) => {
+        console.error('DB Connection Error:', error);
+      });
   });
+}
