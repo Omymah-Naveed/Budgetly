@@ -76,7 +76,7 @@ export const getApiErrorMessage = (error) => {
   }
 
   if (error?.code === 'ERR_NETWORK') {
-    return 'Cannot reach the API. Make sure the backend is running on http://localhost:5000.'
+    return 'Cannot reach the API. Make sure the backend is running on https://budgetlybackend.vercel.app'
   }
 
   if (error?.code === 'ECONNABORTED') {
